@@ -14,6 +14,11 @@
 [node-url]: https://nodejs.org/
 [node-image]: https://img.shields.io/badge/NodeJS-green?style=for-the-badge&logo=Node-dot-js&logoColor=black
 
+---
+
+1º - yarn install
+
+2º - yarn dev
 
 ---
 

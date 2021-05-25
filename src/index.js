@@ -17,9 +17,20 @@ function verifyIfExistsAccountCPF(request, response, next) {
   }
 
   request.customer = customer;
-
   return next();
 }
+
+function getBalance(statement) {
+  const balance = statement.reduce((acc, uni) => {
+    if (uni.type === 'credit') {
+      return acc + uni.amount;
+    } else {
+      return acc + uni.amount;
+    }
+  }, 0);
+
+  return balance;
+};
 
 app.post('/account', (request, response) => {
   const {cpf, name} = request.body;
@@ -47,14 +58,14 @@ app.get('/statement', verifyIfExistsAccountCPF, (request, response) => {
   return response.status(200).json(customer.statement);
 });
 
-app.post('/deposit',verifyIfExistsAccountCPF, (request, response) => {
+app.post('/deposit', verifyIfExistsAccountCPF, (request, response) => {
   const { description, amount } = request.body;
   const { customer } = request;
 
   const statementOperation = {
     description,
     amount,
-    create_at: new Date(),
+    created_at: new Date(),
     type: "credit"
   }
 
@@ -62,4 +73,25 @@ app.post('/deposit',verifyIfExistsAccountCPF, (request, response) => {
 
   return response.status(201).send();
 
+})
+
+app.post('/withdraw', verifyIfExistsAccountCPF, (request, response) => {
+  const { amount } = request.body;
+  const { customer } = request;
+
+  const balance = getBalance(customer.statement);
+
+  if(amount > balance) {
+    return response.status(406).json({ message: "You can't withdraw more than you have." });
+  }
+
+  const statementOperation = {
+    amount,
+    created_at: new Date(),
+    type: "debit"
+  };
+
+  customer.statement.push(statementOperation);
+
+  return response.status(201).send()
 })

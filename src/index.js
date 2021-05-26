@@ -50,15 +50,15 @@ app.post('/account', (request, response) => {
   return response.status(201).send();
 })
 
-// app.use(verifyIfExistsAccountCPF);
+app.use(verifyIfExistsAccountCPF);
 
-app.get('/statement', verifyIfExistsAccountCPF, (request, response) => {
+app.get('/statement', (request, response) => {
   const { customer } = request;
 
   return response.status(200).json(customer.statement);
 });
 
-app.post('/deposit', verifyIfExistsAccountCPF, (request, response) => {
+app.post('/deposit', (request, response) => {
   const { description, amount } = request.body;
   const { customer } = request;
 
@@ -75,7 +75,7 @@ app.post('/deposit', verifyIfExistsAccountCPF, (request, response) => {
 
 })
 
-app.post('/withdraw', verifyIfExistsAccountCPF, (request, response) => {
+app.post('/withdraw', (request, response) => {
   const { amount } = request.body;
   const { customer } = request;
 
@@ -96,7 +96,7 @@ app.post('/withdraw', verifyIfExistsAccountCPF, (request, response) => {
   return response.status(201).send()
 })
 
-app.get('/statement/date', verifyIfExistsAccountCPF, (request, response) => {
+app.get('/statement/date', (request, response) => {
   const { customer } = request;
   const { date } = request.query;
 
@@ -107,3 +107,36 @@ app.get('/statement/date', verifyIfExistsAccountCPF, (request, response) => {
 
   return response.json(statement);
 })
+
+app.put('/account', (request, response) => {
+  const { name } = request.body;
+  const { customer } = request;
+
+  customer.name = name;
+
+  return response.status(201).json(customer);
+})
+
+app.get('/account', (request, response) => {
+  const { customer } = request;
+  
+  return response.status(201).json(customer);
+});
+
+app.delete('/account', (request, response) => {
+  const { customer } = request;
+
+  const account = customers.findIndex( f => customer.cpf == f.cpf);
+
+  customers.splice(account, 1);
+ 
+  return response.status(201).json({message : 'Your account has been deleted.', customersLeft: customers});
+});
+
+app.get('/balance', (request, response) => {
+  const { customer } = request;
+
+  const balance = getBalance(customer.statement);
+
+  return response.status(201).json({message : 'Your balance is: '+ balance});
+});
